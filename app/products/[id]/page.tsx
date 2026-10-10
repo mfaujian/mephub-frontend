@@ -25,7 +25,7 @@ export async function generateMetadata({
   if (!product) return { title: "Product not found" };
   return {
     title: product.name,
-    description: `${product.name} from ${product.seller?.store_name ?? "a RevoShop supplier"}, ${formatRupiah(product.price)}.`,
+    description: `${product.name} from ${product.seller?.store_name ?? "a MEPhub supplier"}, ${formatRupiah(product.price)}.`,
   };
 }
 

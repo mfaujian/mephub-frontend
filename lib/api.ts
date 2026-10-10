@@ -45,7 +45,7 @@ async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise
     });
   } catch (error) {
     unstable_rethrow(error);
-    throw new ApiError("Could not reach the RevoShop API", 0);
+    throw new ApiError("Could not reach the MEPhub API", 0);
   }
 
   if (!response.ok) {
