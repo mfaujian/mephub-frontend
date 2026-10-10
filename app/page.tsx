@@ -1,8 +1,16 @@
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import ProductGrid from "@/components/ProductGrid";
+import { mockCategories, mockProducts } from "@/lib/mock-data";
+
 export default function Home() {
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="text-2xl font-bold text-brand">MEPhub Industrial</h1>
-      <p className="mt-2 text-slate-600">Scaffold is running.</p>
-    </main>
+    <>
+      <Header />
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+        <ProductGrid initialProducts={mockProducts} categories={mockCategories} />
+      </main>
+      <Footer />
+    </>
   );
 }
