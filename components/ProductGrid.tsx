@@ -1,46 +1,58 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import AddProductForm from "@/components/AddProductForm";
 import CartSummary from "@/components/CartSummary";
 import ProductCard from "@/components/ProductCard";
-import SearchBar from "@/components/SearchBar";
 import { useCart } from "@/hooks/useCart";
 import type { CategoryOption, Product } from "@/types";
 
 interface ProductGridProps {
-  initialProducts: Product[];
+  products: Product[];
   categories: CategoryOption[];
+  searchText?: string;
+  toolbar?: ReactNode;
+  pagination?: ReactNode;
 }
 
-export default function ProductGrid({ initialProducts, categories }: ProductGridProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [query, setQuery] = useState("");
+export default function ProductGrid({
+  products,
+  categories,
+  searchText = "",
+  toolbar,
+  pagination,
+}: ProductGridProps) {
+  const [drafts, setDrafts] = useState<Product[]>([]);
   const { cart, add, remove, clear, itemCount, total } = useCart();
 
-  const visibleProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(query.trim().toLowerCase()),
-  );
-
   const handleAddProduct = (product: Product) =>
-    setProducts((previous) => [product, ...previous]);
+    setDrafts((previous) => [product, ...previous]);
+
+  const needle = searchText.trim().toLowerCase();
+  const visibleDrafts = drafts.filter((draft) => draft.name.toLowerCase().includes(needle));
+  const allProducts = [...visibleDrafts, ...products];
 
   return (
     <div className="grid gap-6 lg:grid-cols-4">
       <div className="space-y-4 lg:col-span-3">
-        <SearchBar value={query} onChange={setQuery} />
+        {/* Wrapped in its own div: in development React mistakes a server-rendered element that
+            sits directly beside other children for a list item without a key and warns. */}
+        <div>{toolbar}</div>
 
-        {visibleProducts.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-slate-500">
-            No products match &quot;{query}&quot;.
+        {allProducts.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-slate-300 p-10 text-center text-slate-500">
+            No products found. Try a different search or category.
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {visibleProducts.map((product) => (
+            {allProducts.map((product) => (
               <ProductCard key={product.id} product={product} onAddToCart={add} />
             ))}
           </div>
         )}
+
+        {pagination}
       </div>
 
       <div className="space-y-4">
