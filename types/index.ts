@@ -9,6 +9,13 @@ export interface SellerSummary {
   store_name: string;
 }
 
+export interface PriceTier {
+  min_qty: number;
+  unit_price: number;
+}
+
+export type FulfillmentType = "stock" | "indent";
+
 export interface Product {
   id: number;
   category_id: number;
@@ -19,12 +26,20 @@ export interface Product {
   price: number;
   stock: number;
   image_url: string | null;
+  sku: string | null;
+  brand: string | null;
+  unit: string;
+  min_order_qty: number;
+  tkdn_percent: number | null;
+  datasheet_url: string | null;
+  fulfillment_type: FulfillmentType;
+  lead_time_days: number | null;
+  price_tiers: PriceTier[];
   is_active: boolean;
   created_at: string | null;
   updated_at: string | null;
   category?: CategorySummary;
   seller?: SellerSummary;
-  isDraft?: boolean;
 }
 
 // ---------- Categories ----------
@@ -44,6 +59,11 @@ export interface CategoryWithCount extends Category {
 export interface CategoryOption {
   id: number;
   name: string;
+}
+
+export interface Brand {
+  name: string;
+  count: number;
 }
 
 // ---------- API envelopes ----------
@@ -72,6 +92,16 @@ export interface CategoryListResponse {
   categories: Category[];
 }
 
+export interface CategoryResponse {
+  message: string;
+  category: Category;
+}
+
+export interface Store {
+  id: number;
+  store_name: string;
+}
+
 // ---------- Orders ----------
 export type OrderStatus =
   | "pending"
@@ -80,9 +110,14 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
+export type PaymentMethod = "bank_transfer" | "request_terms";
+export type PaymentStatus = "unpaid" | "paid" | "terms_requested" | "terms_approved";
+
 export interface OrderItem {
   product_id: number;
+  sku: string | null;
   product_name: string | null;
+  unit: string | null;
   quantity: number;
   unit_price: number;
   subtotal: number;
@@ -95,6 +130,13 @@ export interface Order {
   status: OrderStatus;
   total_amount: number;
   shipping_address: string;
+  po_number: string | null;
+  notes: string | null;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  requested_delivery_date: string | null;
+  buyer: { id: number; full_name: string; email: string } | null;
+  seller: { id: number; store_name: string } | null;
   order_items: OrderItem[];
   created_at: string | null;
   updated_at: string | null;
@@ -106,14 +148,73 @@ export interface OrderListResponse {
   meta: PaginationMeta;
 }
 
+export interface CreateOrderPayload {
+  items: { product_id: number; quantity: number }[];
+  shipping_address_id?: number;
+  shipping_address?: string;
+  po_number?: string;
+  notes?: string;
+  payment_method: PaymentMethod;
+  requested_delivery_date?: string;
+}
+
+// ---------- Addresses ----------
+export interface Address {
+  id: number;
+  label: string;
+  recipient_name: string;
+  phone: string;
+  address_line: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  is_default: boolean;
+}
+
+export type AddressInput = Omit<Address, "id">;
+
 // ---------- Auth ----------
+export type UserRole = "admin" | "user";
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  avatar_url?: string | null;
+}
+
+export interface AuthSession {
+  token: string;
+  user: AuthUser;
+}
+
 export interface LoginResponse {
   message: string;
   token: string;
+  user: AuthUser;
 }
 
-// ---------- Cart ----------
+// ---------- Cart (kept in localStorage) ----------
+/** Just enough product data to draw the cart without another request. The server re-checks everything at checkout. */
+export interface CartProductSnapshot {
+  name: string;
+  sku: string | null;
+  brand: string | null;
+  unit: string;
+  price: number;
+  image_url: string | null;
+  stock: number;
+  min_order_qty: number;
+  fulfillment_type: FulfillmentType;
+  lead_time_days: number | null;
+  price_tiers: PriceTier[];
+  seller_id: number;
+  seller_name: string | null;
+}
+
 export interface CartItem {
-  product: Product;
+  productId: number;
   quantity: number;
+  snapshot: CartProductSnapshot;
 }

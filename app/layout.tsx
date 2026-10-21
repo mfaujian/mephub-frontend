@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import HeaderFallback from "@/components/HeaderFallback";
+import Providers from "@/components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | MEPhub Industrial",
   },
   description:
-    "B2B marketplace for industrial and manufacturing supplies: electrical, mechanical, pneumatic, safety and tooling.",
+    "Marketplace for mechanical, electrical and plumbing (MEP) supplies: part numbers, volume pricing, PO and payment terms for businesses, simple checkout for everyone.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -30,9 +33,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Header />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
-        <Footer />
+        <Providers>
+          {/* Header reads the current URL, so it waits inside Suspense (Next.js cache components rule) */}
+          <Suspense fallback={<HeaderFallback />}>
+            <Header />
+          </Suspense>
+          <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
