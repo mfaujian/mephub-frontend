@@ -1,74 +1,131 @@
-# MEPhub Industrial (Frontend)
+# MEPhub Industrial: Frontend
 
-A B2B marketplace frontend for **industrial and manufacturing supplies**: electrical, mechanical, pneumatic, safety and tooling products from multiple suppliers. Built for RevoU's Full-Stack Software Engineering program, **Module 3 Checkpoint 2**, with Next.js (App Router), React, TypeScript and Tailwind CSS.
+MEPhub is a marketplace for **mechanical, electrical and plumbing (MEP) supplies**. It serves two kinds of buyers from one catalog:
 
-It consumes the Flask REST API from Module 2: [multivendor-ecommerce-backend](https://github.com/mfaujian/multivendor-ecommerce-backend) (live docs: https://multivendor-ecommerce-backend.up.railway.app/swagger-ui/).
+- **Individuals (B2C):** browse, add to cart, check out in a few clicks.
+- **Businesses (B2B):** search by part number (SKU), see volume prices, paste a parts list into **Quick order**, add a PO number, choose a delivery date and request **payment terms**.
 
-## Features implemented
+This repository is the Next.js frontend. It talks to the Flask REST API in
+[multivendor-ecommerce-backend](https://github.com/mfaujian/multivendor-ecommerce-backend)
+(live on Railway). Built for the RevoU Full-Stack Software Engineering program, Module 3 (Checkpoints 1 to 3).
 
-- **Home** (`/`): hero section, the 5 latest products and category shortcuts, fetched on the server.
-- **Products** (`/products`): live search and category filter that write to the URL (`?q=`, `?category=`) and refetch from the API, with pagination.
-- **Product detail** (`/products/[id]`): image, supplier, stock, a specification table parsed from the product description, and a dynamic browser-tab title via `generateMetadata`.
-- **Categories** (`/categories`): top-level categories with product counts and links into the filtered catalog.
-- **Orders** (`/orders`): orders of a demo buyer account, fetched server-side with a server-only credential.
-- **Reusable typed components**: `Header` (active-route styling with `usePathname`), `Footer`, `Card`, `ProductCard` (typed props, optional props with defaults, quantity counter, in-stock / out-of-stock states), `ProductGrid`, `SearchBar`, `AddProductForm` (client-side validation), `CartSummary`.
-- **Immutable local state**: add to cart, quantity counter, cart totals, and local product drafts.
-- **Loading and error UI**: `loading.tsx` skeletons and `error.tsx` friendly errors on every data-fetching route.
+## Features
 
-## Tech stack
+**Everyone**
+- Home page with latest products, categories and brands (server component)
+- Product list with search (name, SKU, brand), category, brand and sort filters, URL-driven and paginated
+- Product detail with specifications table, volume-price table, live line total, datasheet link, made-to-order lead time
+- Category listing, Quick order (paste `SKU, quantity` lines), shopping cart saved in `localStorage`
 
-Next.js 16.4 (App Router, Server Components, Cache Components) · React 19 · TypeScript · Tailwind CSS v4 · ESLint
+**Customer (role `user`)**
+- Register and log in (`/register`, `/login`); the username in the header survives a refresh
+- Cart page with quantities, totals, remove buttons, empty state and a disabled checkout button when empty
+- Checkout (`/checkout`): saved delivery addresses, PO number, requested delivery date, notes, payment method
+  (bank transfer or payment terms). Confirming calls `POST /orders`, clears the cart and opens `/orders`
+- Orders list and detail (`/orders`, `/orders/[id]`), cancel a pending order, order again, print
+- Address book (`/account/addresses`)
 
-## Project structure
+**Admin (role `admin`)**
+- Product CRUD at `/dashboard` (`CreateProductForm`, `EditProductForm`), including supplier, SKU, volume pricing and made-to-order; a product in an active order cannot be deleted and the error is shown
+- Category CRUD at `/dashboard/categories` (`CreateCategoryForm`); a category with products or subcategories cannot be deleted
+- Read-only overview of all orders at `/dashboard/orders`, with search and status filter; order detail has admin actions (status, payment)
+
+**Security and quality**
+- Route guards: `ProtectedRoute`, `AdminRoute`, `PublicOnlyRoute`
+- Toast notifications (react-hot-toast) for every success and error
+- 73 Playwright end-to-end tests
+
+## Technologies
+
+Next.js 16 (App Router, cache components) · React 19 · TypeScript · Tailwind CSS 4 · react-hot-toast ·
+Playwright · `next/navigation` (`useRouter`, `usePathname`, `useSearchParams`, `useParams`) ·
+`localStorage` (session and cart persistence) · `NEXT_PUBLIC_API_BASE_URL` (API address)
+
+## Folder structure
 
 ```
-app/                      Routes (each folder is a URL; page.tsx renders it)
-  layout.tsx              Root layout: Header + Footer around every page
-  page.tsx                Home
-  products/
-    layout.tsx            Nested layout shared by /products and /products/[id]
-    page.tsx              Product list (search, category filter, pagination)
-    [id]/page.tsx         Product detail + generateMetadata
-  categories/ orders/     Each with page.tsx, loading.tsx, error.tsx
-components/               Reusable UI components
-hooks/                    useCart (cart state)
-lib/                      api.ts (server-only fetchers), auth.ts, config.ts, cart.ts, format.ts, validation.ts
-types/                    Shared TypeScript interfaces
+app/            pages and layouts (file-based routes)
+components/     reusable UI (forms/, guards/ inside)
+context/        AuthContext, CartContext
+hooks/          useAuth, useCart, useAsyncData, useDebouncedValue
+lib/            api.ts (server), api-client.ts (browser), cart, validation, formatting
+types/          shared TypeScript types
+tests/          Playwright end-to-end tests
 ```
 
-## Environment variables
+## Run it locally
 
-Copy `.env.example` to `.env.local` and fill it in. `.env.local` is git-ignored.
-
-| Variable | Where it runs | Purpose |
-|---|---|---|
-| `NEXT_PUBLIC_API_BASE_URL` | server and browser | Base URL of the Flask API |
-| `API_DEMO_EMAIL` | server only | Demo buyer used by `/orders` until real login (Checkpoint 3) |
-| `API_DEMO_PASSWORD` | server only | Password of that demo buyer |
-| `API_DEMO_DELAY_MS` | server only, optional | Slows API calls down to demo `loading.tsx` |
-
-Variables without the `NEXT_PUBLIC_` prefix are never sent to the browser.
-
-## Run locally
+You need Node.js 22+, and the backend running (locally or on Railway) with the MEP demo data loaded.
 
 ```bash
+git clone https://github.com/mfaujian/mephub-frontend.git
+cd mephub-frontend
 npm install
-cp .env.example .env.local   # then fill in the values
-npm run dev                  # http://localhost:3000
+cp .env.example .env.local      # then edit the values (see below)
+npm run dev                     # http://localhost:3000
 ```
 
-Other scripts: `npm run lint`, `npm run build`, `npm start`.
+`.env.local`:
+
+| Variable | Meaning |
+| --- | --- |
+| `NEXT_PUBLIC_API_BASE_URL` | Address of the Flask API, e.g. `http://localhost:5000` |
+| `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD` | Admin account used by the tests |
+| `E2E_USER_EMAIL` / `E2E_USER_PASSWORD` | Customer account used by the tests |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Optional: enables the "Ask for a quotation on WhatsApp" button |
+
+Never commit `.env.local`. Avoid `#` and `$` in passwords stored in `.env` files.
+
+Demo accounts are created by the backend seeder (`python seed_mephub.py --yes`):
+`admin@mephub.id` (admin), `buyer@mephub.id`, `kontraktor@mephub.id`, `e2e.buyer@mephub.id` (customers).
+
+## Run the tests
+
+```bash
+npx playwright install chromium   # once
+npm run test:e2e                  # builds the app, starts it and runs all tests
+npm run test:e2e:report           # open the HTML report
+```
+
+The tests use the real backend. They create their own data (unique names and PO numbers), clean up after
+themselves and can be repeated. Use a local backend with `RATELIMIT_LOGIN` loosened, see the backend README.
+
+Other scripts: `npm run lint`, `npm run typecheck`, `npm run build`, `npm run start`.
 
 ## Screenshots
 
-![Home](docs/screenshots/01-home.png)
-![Products: search and category filter](docs/screenshots/02-products-filter.png)
-![Product detail with dynamic title](docs/screenshots/03-product-detail.png)
-![Order page](docs/screenshots/07-order.png)
-![Active navigation](docs/screenshots/04-active-nav.png)
-![Loading state](docs/screenshots/05-loading.png)
-![Error state](docs/screenshots/06-error.png)
+Save images in `docs/screenshots/` and keep these file names:
 
-## Checkpoint 3 (next)
+| Page | File |
+| --- | --- |
+| Home | `docs/screenshots/cp3-home.png` |
+| Product listing | `docs/screenshots/cp3-products.png` |
+| Product detail | `docs/screenshots/cp3-product-detail.png` |
+| Category listing | `docs/screenshots/cp3-categories.png` |
+| Register | `docs/screenshots/cp3-register.png` |
+| Login | `docs/screenshots/cp3-login.png` |
+| Admin dashboard | `docs/screenshots/cp3-dashboard.png` |
 
-Authentication, cart persistence with `localStorage`, checkout (`POST /orders`), the admin dashboard, a Playwright E2E suite, and deployment on Vercel.
+![Home](docs/screenshots/cp3-home.png)
+![Product listing](docs/screenshots/cp3-products.png)
+![Product detail](docs/screenshots/cp3-product-detail.png)
+![Category listing](docs/screenshots/cp3-categories.png)
+![Register](docs/screenshots/cp3-register.png)
+![Login](docs/screenshots/cp3-login.png)
+![Admin dashboard](docs/screenshots/cp3-dashboard.png)
+
+## Rendering strategy
+
+| Route | Strategy | Why |
+| --- | --- | --- |
+| `/`, `/products`, `/products/[id]`, `/categories` | Partial prerender: static shell, catalog data streamed from the API | Public data that changes often |
+| `/login`, `/register`, `/cart`, `/checkout`, `/quick-order` | Static shell, client-side data | Depends on the browser (`localStorage`) |
+| `/orders`, `/orders/[id]`, `/account/addresses` | Static shell, client-side data behind `ProtectedRoute` | Needs the logged-in user's token |
+| `/dashboard`, `/dashboard/*` | Static shell, client-side data behind `AdminRoute` | Admin only |
+
+## Notes and limits
+
+- The session token is kept in `localStorage` (simple, required by the course). A production system would use an `HttpOnly` cookie.
+- The server is the source of truth for prices, stock and minimum order quantities; the browser only displays them.
+- Payment is simulated: bank transfer is marked paid by an admin, payment terms are approved by an admin.
+````

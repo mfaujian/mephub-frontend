@@ -109,7 +109,7 @@ test.describe("admin product CRUD on /dashboard", () => {
   test("the product table pages through the catalog", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(tid(page, "product-row")).toHaveCount(10);
-    await page.getByRole("button", { name: /Next/ }).click();
+    await page.getByRole("button", { name: /Next/ }).first().click();
     await expect(page.getByText("Page 2 of")).toBeVisible();
   });
 });

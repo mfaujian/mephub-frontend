@@ -20,7 +20,9 @@ test.describe("browsing the catalog", () => {
 
   test("search also matches the brand and sorting by price works", async ({ page }) => {
     await page.goto("/products?q=fluke&sort=price_desc");
-    const names = await page.getByRole("article").getByRole("heading").allTextContents();
+    const productHeadings = page.getByRole("article").getByRole("heading");
+    await expect(productHeadings.first()).toBeVisible({ timeout: 5000 });
+    const names = await productHeadings.allTextContents();
     expect(names).toEqual(["AC Clamp Meter 600A", "Digital Multimeter CAT III"]);
   });
 
