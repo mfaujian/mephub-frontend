@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
-import { inputClass } from "@/lib/ui";
+import { inputClass, inputErrorClass } from "@/lib/ui";
 
 interface FieldShellProps {
   id: string;
@@ -60,7 +60,7 @@ export function TextField({
         name={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, error, hint)}
-        className={`${inputClass} ${error ? "border-red-400" : ""}`}
+        className={error ? inputErrorClass : inputClass}
         {...rest}
       />
     </FieldShell>
@@ -82,7 +82,7 @@ export function TextAreaField({
         name={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, error, hint)}
-        className={`${inputClass} ${error ? "border-red-400" : ""}`}
+        className={error ? inputErrorClass : inputClass}
         {...rest}
       />
     </FieldShell>
@@ -105,7 +105,7 @@ export function SelectField({
         name={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy(id, error, hint)}
-        className={`${inputClass} ${error ? "border-red-400" : ""}`}
+        className={error ? inputErrorClass : inputClass}
         {...rest}
       >
         {children}

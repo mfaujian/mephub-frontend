@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Card from "@/components/Card";
 import PurchasePanel from "@/components/PurchasePanel";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { getProduct } from "@/lib/api";
 import { formatRupiah, parseDescription } from "@/lib/format";
 
@@ -39,8 +40,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   if (!product) notFound();
 
   const { specs, notes } = parseDescription(product.description);
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-  const inquiry = encodeURIComponent(`Hello MEPhub, I would like a quotation for ${product.name}${product.sku ? ` (${product.sku})` : ""}.`);
 
   return (
     <div className="space-y-4">
@@ -127,16 +126,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 Datasheet (PDF)
               </a>
             )}
-            {whatsapp && (
-              <a
-                href={`https://wa.me/${whatsapp}?text=${inquiry}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-md border border-green-600 px-3 py-1.5 font-medium text-green-700 hover:bg-green-50"
-              >
-                Ask for a quotation on WhatsApp
-              </a>
-            )}
+            <WhatsAppLink
+              message={`Hello MEPhub, I would like to check stock and price for ${product.name}${product.sku ? ` (${product.sku})` : ""}.`}
+            />
           </div>
           {specs.length > 0 && (
             <Card className="overflow-hidden">

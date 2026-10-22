@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import Card from "@/components/Card";
 import AddressForm from "@/components/forms/AddressForm";
 import { FormError, SelectField, TextAreaField, TextField } from "@/components/forms/Fields";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { useCart } from "@/hooks/useCart";
 import { createOrder, fetchAddresses } from "@/lib/api-client";
@@ -231,6 +232,10 @@ export default function CheckoutView() {
           >
             {submitting ? "Placing order..." : "Confirm order"}
           </button>
+          <WhatsAppLink
+            className="w-full justify-center"
+            message={`Hello MEPhub, I am about to order ${items.length} ${items.length === 1 ? "item" : "items"} (total ${formatRupiah(subtotal)}) and would like to confirm stock and price.`}
+          />
           <Link href="/cart" className="block text-center text-sm font-medium text-brand hover:underline">
             &larr; Back to cart
           </Link>

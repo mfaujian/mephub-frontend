@@ -29,7 +29,7 @@ export default function QuantityInput({ value, onChange, min = 1, max = 100000, 
     "px-3 py-1.5 text-lg leading-none text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent";
 
   return (
-    <div className="inline-flex items-center rounded-md border border-slate-300 bg-white" role="group" aria-label={label}>
+    <div className="inline-flex items-center rounded-md border border-slate-500 bg-white" role="group" aria-label={label}>
       <button type="button" aria-label="Decrease quantity" className={stepButton} disabled={value <= min} onClick={() => commit(String(value - 1))}>
         &minus;
       </button>
@@ -45,7 +45,7 @@ export default function QuantityInput({ value, onChange, min = 1, max = 100000, 
             commit((event.target as HTMLInputElement).value);
           }
         }}
-        className="w-16 border-x border-slate-300 py-1.5 text-center text-sm font-medium tabular-nums focus:outline-none"
+        className="w-16 border-x border-slate-500 py-1.5 text-center text-sm font-medium tabular-nums focus:outline-none"
       />
       <button type="button" aria-label="Increase quantity" className={stepButton} disabled={value >= max} onClick={() => commit(String(value + 1))}>
         +

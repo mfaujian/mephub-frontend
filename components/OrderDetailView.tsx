@@ -94,6 +94,9 @@ export default function OrderDetailView() {
         return;
       }
       toast.success(`${added} ${added === 1 ? "item" : "items"} added to your cart`);
+      if (added < current.order_items.length) {
+        toast(`${current.order_items.length - added} item(s) are no longer available and were skipped.`);
+      }
       router.push("/cart");
     } catch (caught) {
       toast.error(errorMessage(caught));
@@ -103,7 +106,12 @@ export default function OrderDetailView() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="order-print space-y-4">
+      {/* Only visible on paper */}
+      <div className="hidden items-center justify-between border-b-2 border-black pb-3 print:flex">
+        <p className="text-lg font-bold">MEPhub Industrial</p>
+        <p className="text-sm font-semibold uppercase tracking-wide">Order confirmation / delivery note</p>
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Link href={isAdmin ? "/dashboard/orders" : "/orders"} className="text-sm font-medium text-brand hover:underline">
           &larr; Back to orders
@@ -138,7 +146,7 @@ export default function OrderDetailView() {
         <PaymentBadge status={order.payment_status} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 print:grid-cols-2">
         <Card className="space-y-2 p-4 text-sm">
           <h2 className="font-semibold text-slate-800">Order details</h2>
           <p>
