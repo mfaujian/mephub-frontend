@@ -18,14 +18,13 @@ test.describe("mocked API responses", () => {
   });
 
   test("the orders page shows an error with a retry button when the server fails", async ({ page }) => {
-    let calls = 0;
-    await page.route("**/orders?**", (route) => {
-      calls += 1;
-      if (calls === 1) return route.fulfill({ status: 500, json: { error: "Internal Server Error" } });
-      return route.continue();
-    });
+    let failing = true;
+    await page.route("**/orders?**", (route) =>
+      failing ? route.fulfill({ status: 500, json: { error: "Internal Server Error" } }) : route.continue(),
+    );
     await page.goto("/orders");
     await expect(page.getByRole("alert").filter({ hasText: "Could not load your orders" })).toBeVisible();
+    failing = false;
     await page.getByRole("button", { name: "Try again" }).click();
     await expect(tid(page, "order-row").first()).toBeVisible();
   });
