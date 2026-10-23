@@ -47,8 +47,8 @@ test.describe("registration", () => {
     await page.getByLabel(/^Password/).fill("Passw0rd!x");
     await page.getByLabel("Confirm password").fill("Passw0rd!x");
     await page.getByRole("button", { name: "Create account" }).click();
-    await expect(page.getByText("An account with this email already exists.")).toBeVisible();
     await expect(page).toHaveURL(/\/register$/);
+    await expect(page.getByText("An account with this email already exists.")).toBeVisible();
   });
 });
 
