@@ -4,6 +4,9 @@
   --color-brand: #0b1f3a;
   --color-brand-light: #16345c;
   --color-accent: #f59e0b;
+  /* Slate: Tailwind v4 ships slate-500 as an oklch() value (about #62748e). Pinning the exact hex makes every
+     `border-slate-500` / `text-slate-500` #64748b: 4.76:1 on white, so form borders pass WCAG 1.4.11 (3:1). */
+  --color-slate-500: #64748b;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -11,4 +14,50 @@
 body {
   background: #f8fafc;
   color: #0f172a;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  /* toast notifications and live-region messages never belong on paper */
+  [role="status"],
+  [role="alert"] {
+    display: none !important;
+  }
+  .order-print {
+    font-size: 11pt;
+  }
+  .order-print,
+  .order-print * {
+    box-shadow: none !important;
+  }
+  .order-print .overflow-x-auto {
+    overflow: visible !important;
+  }
+  .order-print table {
+    width: 100% !important;
+    min-width: 0 !important;
+    border-collapse: collapse;
+  }
+  .order-print thead {
+    display: table-header-group; /* repeat the column headings on every page */
+  }
+  .order-print tr {
+    break-inside: avoid;
+  }
+  .order-print th,
+  .order-print td {
+    border-bottom: 1px solid #94a3b8;
+  }
+  .order-print a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
 }

@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Card from "@/components/Card";
+import PurchasePanel from "@/components/PurchasePanel";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { getProduct } from "@/lib/api";
 import { formatRupiah, parseDescription } from "@/lib/format";
 
@@ -15,17 +17,17 @@ function parseId(id: string): number | null {
   return Number.isInteger(number) && number > 0 ? number : null;
 }
 
-export async function generateMetadata({
-  params,
-}: ProductDetailPageProps): Promise<Metadata> {
+// Dynamic metadata: every product gets its own title and description.
+export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const productId = parseId(id);
   const product = productId ? await getProduct(productId) : null;
-
   if (!product) return { title: "Product not found" };
   return {
     title: product.name,
-    description: `${product.name} from ${product.seller?.store_name ?? "a MEPhub supplier"}, ${formatRupiah(product.price)}.`,
+    description: `${product.name}${product.sku ? ` (${product.sku})` : ""} from ${
+      product.seller?.store_name ?? "a MEPhub supplier"
+    }, ${formatRupiah(product.price)} per ${product.unit}.`,
   };
 }
 
@@ -38,16 +40,14 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   if (!product) notFound();
 
   const { specs, notes } = parseDescription(product.description);
-  const inStock = product.stock > 0;
 
   return (
     <div className="space-y-4">
       <Link href="/products" className="text-sm font-medium text-brand hover:underline">
         &larr; Back to products
       </Link>
-
       <div className="grid gap-8 md:grid-cols-2">
-        <Card className="overflow-hidden self-start">
+        <Card className="self-start overflow-hidden">
           {product.image_url ? (
             <Image
               src={product.image_url}
@@ -59,12 +59,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               className="aspect-square w-full object-cover"
             />
           ) : (
-            <div className="flex aspect-square items-center justify-center bg-slate-100 text-slate-400">
-              No image
-            </div>
+            <div className="flex aspect-square items-center justify-center bg-slate-100 text-slate-400">No image</div>
           )}
         </Card>
-
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-2 text-sm">
             {product.category && (
@@ -75,35 +72,67 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 {product.category.name}
               </Link>
             )}
-            <span
-              className={`rounded-full px-3 py-0.5 font-medium ${
-                inStock ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-              }`}
-            >
-              {inStock ? `${product.stock.toLocaleString("id-ID")} in stock` : "Out of stock"}
-            </span>
+            {product.fulfillment_type === "indent" ? (
+              <span className="rounded-full bg-indigo-100 px-3 py-0.5 font-medium text-indigo-700">
+                Made to order · {product.lead_time_days} days
+              </span>
+            ) : (
+              <span
+                className={`rounded-full px-3 py-0.5 font-medium ${
+                  product.stock > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                }`}
+              >
+                {product.stock > 0 ? `${product.stock.toLocaleString("id-ID")} ${product.unit} in stock` : "Out of stock"}
+              </span>
+            )}
+            {product.tkdn_percent !== null && (
+              <span className="rounded-full bg-sky-100 px-3 py-0.5 font-medium text-sky-700">TKDN {product.tkdn_percent}%</span>
+            )}
           </div>
-
+          {(product.brand || product.sku) && (
+            <p className="text-sm text-slate-600">
+              {product.brand && <span className="font-medium text-slate-900">{product.brand}</span>}
+              {product.brand && product.sku && " · "}
+              {product.sku && (
+                <>
+                  Part no. <span className="font-mono text-slate-900">{product.sku}</span>
+                </>
+              )}
+            </p>
+          )}
           <h1 className="text-2xl font-bold leading-snug text-slate-900">{product.name}</h1>
-          <p className="text-3xl font-bold text-brand">{formatRupiah(product.price)}</p>
-
+          <p className="text-3xl font-bold text-brand">
+            {formatRupiah(product.price)} <span className="text-base font-normal text-slate-500">/ {product.unit}</span>
+          </p>
           {product.seller && (
             <p className="text-sm text-slate-600">
               Supplier: <span className="font-medium text-slate-900">{product.seller.store_name}</span>
             </p>
           )}
-
           {notes.map((note) => (
             <p key={note} className="text-slate-700">
               {note}
             </p>
           ))}
-
+          <PurchasePanel product={product} />
+          <div className="flex flex-wrap gap-3 text-sm">
+            {product.datasheet_url && (
+              <a
+                href={product.datasheet_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Datasheet (PDF)
+              </a>
+            )}
+            <WhatsAppLink
+              message={`Hello MEPhub, I would like to check stock and price for ${product.name}${product.sku ? ` (${product.sku})` : ""}.`}
+            />
+          </div>
           {specs.length > 0 && (
             <Card className="overflow-hidden">
-              <h2 className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
-                Specifications
-              </h2>
+              <h2 className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">Specifications</h2>
               <dl className="divide-y divide-slate-100 text-sm">
                 {specs.map((spec) => (
                   <div key={spec.label} className="grid grid-cols-3 gap-2 px-4 py-2">

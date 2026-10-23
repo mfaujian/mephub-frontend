@@ -1,21 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { addToCart, getCartTotals, removeFromCart } from "@/lib/cart";
-import type { CartItem, Product } from "@/types";
+import { useContext } from "react";
+import { CartContext, type CartContextValue } from "@/context/CartContext";
 
-export function useCart() {
-  const [cart, setCart] = useState<CartItem[]>([]);
-
-  const add = (product: Product, quantity: number = 1) =>
-    setCart((previous) => addToCart(previous, product, quantity));
-
-  const remove = (productId: number) =>
-    setCart((previous) => removeFromCart(previous, productId));
-
-  const clear = () => setCart([]);
-
-  const { itemCount, total } = getCartTotals(cart);
-
-  return { cart, add, remove, clear, itemCount, total };
+/** Access the shopping cart (saved in localStorage) and its actions. */
+export function useCart(): CartContextValue {
+  const context = useContext(CartContext);
+  if (!context) throw new Error("useCart must be used inside <CartProvider>");
+  return context;
 }
