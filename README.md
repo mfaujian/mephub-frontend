@@ -7,7 +7,7 @@ A marketplace frontend for **mechanical, electrical and plumbing (MEP) supplies*
 
 It consumes the Flask REST API from Module 2: [multivendor-ecommerce-backend](https://github.com/mfaujian/multivendor-ecommerce-backend) (live docs: https://multivendor-ecommerce-backend.up.railway.app/swagger-ui/).
 
-**Live demo:** https://YOUR-APP.vercel.app
+**Live demo:** https://mephub-frontend.vercel.app
 
 ## Features implemented
 
@@ -105,13 +105,9 @@ The tests use the real backend, create their own data (unique names and PO numbe
 | ![Home](docs/screenshots/cp3-home.png) | ![Product listing](docs/screenshots/cp3-products.png) |
 | ![Product detail](docs/screenshots/cp3-product-detail.png) | ![Category listing](docs/screenshots/cp3-categories.png) |
 | ![Register](docs/screenshots/cp3-register.png) | ![Login](docs/screenshots/cp3-login.png) |
-| ![Admin dashboard](docs/screenshots/cp3-dashboard.png) | |
-
-Checkpoint 2 states:
-
-![Active navigation](docs/screenshots/04-active-nav.png)
-![Loading state](docs/screenshots/05-loading.png)
-![Error state](docs/screenshots/06-error.png)
+| ![Admin dashboard](docs/screenshots/cp3-dashboard.png) | ![Orders](docs/screenshots/cp3-orders.png) |
+| ![Cart](docs/screenshots/cp3-cart.png) | ![Addresses](docs/screenshots/cp3-addresses.png) |
+| ![Checkout](docs/screenshots/cp3-checkout.png) | ![Dashboard](docs/screenshots/cp3-dashboard2.png) |
 
 ## Rendering strategy
 
